@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
@@ -61,7 +62,7 @@ public class ClusterServiceImplTest2 {
     @Test
     public void testFindUnhealthyClusters() throws Exception {
         when(delayService.getDelay(any())).thenReturn(10L);
-        when(delayService.getDelay(new HostPort("127.0.0.2", 6379))).thenReturn(DefaultDelayMonitor.SAMPLE_LOST_BUT_PONG);
+        when(delayService.getDelay(new HostPort("127.0.0.2", 6379))).thenReturn(TimeUnit.NANOSECONDS.toMillis(DefaultDelayMonitor.SAMPLE_LOST_BUT_PONG));
         when(clusterDao.findClustersWithName(Lists.newArrayList("cluster1")))
                 .thenReturn(Lists.newArrayList(new ClusterTbl().setClusterName("cluster1")));
 
@@ -76,8 +77,8 @@ public class ClusterServiceImplTest2 {
     @Test
     public void testFindUnhealthyClusters2() throws Exception {
         when(delayService.getDelay(any())).thenReturn(10L);
-        when(delayService.getDelay(new HostPort("127.0.0.2", 6379))).thenReturn(DefaultDelayMonitor.SAMPLE_LOST_BUT_PONG);
-        when(delayService.getDelay(new HostPort("127.0.0.4", 6380))).thenReturn(DefaultDelayMonitor.SAMPLE_LOST_AND_NO_PONG);
+        when(delayService.getDelay(new HostPort("127.0.0.2", 6379))).thenReturn(TimeUnit.NANOSECONDS.toMillis(DefaultDelayMonitor.SAMPLE_LOST_BUT_PONG));
+        when(delayService.getDelay(new HostPort("127.0.0.4", 6380))).thenReturn(TimeUnit.NANOSECONDS.toMillis(DefaultDelayMonitor.SAMPLE_LOST_AND_NO_PONG));
         when(clusterDao.findClustersWithName(anyList())).then(new Answer<List<ClusterTbl>>() {
             @Override
             public List<ClusterTbl> answer(InvocationOnMock invocation) throws Throwable {

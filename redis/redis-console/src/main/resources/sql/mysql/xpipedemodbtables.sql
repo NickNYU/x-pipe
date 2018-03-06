@@ -66,6 +66,7 @@ CREATE TABLE `CLUSTER_TBL` (
   `cluster_org_id` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'organization id of cluster',
   `cluster_admin_emails` varchar(1024) DEFAULT ' ' COMMENT 'persons email who in charge of this cluster',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'cluster create time',
+  `credis_route_rule` int(4) NOT NULL DEFAULT '2' COMMENT 'credis read routing rule, 1 for read master, 2 for read primary slave, 3 for read current dc slave',
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `cluster_name` (`cluster_name`),
@@ -250,3 +251,16 @@ CREATE TABLE `organization_tbl` (
   UNIQUE KEY `org_name` (`org_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Organization Info';
 INSERT INTO organization_tbl (`org_id`, `org_name`) VALUES ('0', '');
+
+-- Operation Event Table
+drop table if exists op_event_tbl;
+CREATE TABLE `op_event_tbl` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `event_type` varchar(20) NOT NULL DEFAULT 'unkown' COMMENT 'event type: switch_route_rule, create_cluster',
+  `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'event start time',
+  `operator` varchar(128) NOT NULL DEFAULT 'unkown' COMMENT 'event operator',
+  `DataChange_LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'data changed last time',
+  `deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'deleted or not',
+  PRIMARY KEY (`id`),
+  KEY `DataChange_LastTime` (`DataChange_LastTime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Operation Events';

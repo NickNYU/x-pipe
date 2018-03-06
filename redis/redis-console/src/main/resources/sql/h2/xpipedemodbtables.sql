@@ -49,27 +49,28 @@ create table CLUSTER_TBL
 	cluster_name varchar(128) not null unique,
 	activedc_id bigint unsigned not null,
 	cluster_description varchar(1024) not null default 'nothing',
-    cluster_last_modified_time varchar(40) not null default '',
-    status varchar(24) not null default 'normal',
-    DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
+  cluster_last_modified_time varchar(40) not null default '',
+  status varchar(24) not null default 'normal',
+  DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
 	deleted tinyint(1) not null default 0,
 	is_xpipe_interested tinyint(1) default 0,
 	cluster_org_id bigint unsigned not null default 0,
-    cluster_admin_emails varchar(250) default ' ',
-    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'cluster create time',
+  cluster_admin_emails varchar(250) default ' ',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `credis_route_rule` int(4) NOT NULL DEFAULT '2',
 );
 
 
 -- DC Cluster Table
 drop table if exists DC_CLUSTER_TBL;
-create table DC_CLUSTER_TBL 
+create table DC_CLUSTER_TBL
 (
 	dc_cluster_id bigint unsigned not null auto_increment primary key,
 	dc_id bigint unsigned not null,
 	cluster_id bigint unsigned not null,
 	metaserver_id bigint unsigned not null,
-    dc_cluster_phase int not null default 1,
-    DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
+  dc_cluster_phase int not null default 1,
+  DataChange_LastTime timestamp default CURRENT_TIMESTAMP,
 	deleted tinyint(1) not null default 0
 );
 
@@ -162,7 +163,7 @@ create table MIGRATION_CLUSTER_TBL
 	deleted tinyint(1) not null default 0
 );
 
--- Migration Shard Table 
+-- Migration Shard Table
 drop table if exists MIGRATION_SHARD_TBL;
 create table MIGRATION_SHARD_TBL
 (
@@ -201,3 +202,14 @@ CREATE TABLE `organization_tbl` (
   deleted tinyint(4) not null default 0,
 );
 INSERT INTO organization_tbl (`org_id`, `org_name`) VALUES ('0', '');
+
+-- Operation Event Table
+drop table if exists op_event_tbl;
+CREATE TABLE `op_event_tbl` (
+  `id` bigint(20) unsigned not null AUTO_INCREMENT primary key,
+  `event_type` varchar(20) not null default 'unkown',
+  `start_time` timestamp not null default CURRENT_TIMESTAMP,
+  `operator` varchar(128) not null default 'unkown',
+  `DataChange_LastTime` timestamp not null default CURRENT_TIMESTAMP,
+  `deleted` tinyint(4) not null default '0',
+);

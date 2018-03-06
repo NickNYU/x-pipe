@@ -12,7 +12,8 @@
     <member name="is-xpipe-interested" field="is_xpipe_interested" value-type="boolean" nullable="false" />
     <member name="cluster-org-id" field="cluster_org_id" value-type="long" length="20" nullable="false" />
     <member name="cluster-admin-emails" field="cluster_admin_emails" value-type="String" length="1024" />
-    <member name="create-time" field="create_time" value-type="Date" nullable="false" />
+    <member name="create-time" field="create_time" value-type="Date" />
+    <member name="credis-route-rule" field="credis_route_rule" value-type="int" length="10" nullable="false" />
     <var name="key-id" value-type="long" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
     <index name="cluster_name" unique="true" members="cluster_name ASC" />
@@ -528,6 +529,46 @@
     <member name="migration-cluster-id" field="migration_cluster_id" value-type="long" length="20" nullable="false" />
     <member name="shard-id" field="shard_id" value-type="long" length="20" nullable="false" />
     <member name="log" field="log" value-type="String" length="20480" nullable="false" />
+    <member name="data-change-last-time" field="DataChange_LastTime" value-type="Date" nullable="false" />
+    <member name="deleted" field="deleted" value-type="int" length="3" nullable="false" />
+    <var name="key-id" value-type="long" key-member="id" />
+    <primary-key name="PRIMARY" members="id" />
+    <index name="DataChange_LastTime" members="DataChange_LastTime ASC" />
+    <readsets>
+      <readset name="FULL" all="true" />
+    </readsets>
+    <updatesets>
+      <updateset name="FULL" all="true" />
+    </updatesets>
+    <query-defs>
+      <query name="find-by-PK" type="SELECT">
+        <param name="key-id" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="insert" type="INSERT">
+        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
+        VALUES(<VALUES/>)]]></statement>
+      </query>
+      <query name="update-by-PK" type="UPDATE">
+        <param name="key-id" />
+        <statement><![CDATA[UPDATE <TABLE/>
+        SET <FIELDS/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="delete-by-PK" type="DELETE">
+        <param name="key-id" />
+        <statement><![CDATA[DELETE FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+    </query-defs>
+  </entity>
+  <entity name="op-event-tbl" table="op_event_tbl" alias="oet">
+    <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
+    <member name="event-type" field="event_type" value-type="String" length="20" nullable="false" />
+    <member name="start-time" field="start_time" value-type="Date" nullable="false" />
+    <member name="operator" field="operator" value-type="String" length="128" nullable="false" />
     <member name="data-change-last-time" field="DataChange_LastTime" value-type="Date" nullable="false" />
     <member name="deleted" field="deleted" value-type="int" length="3" nullable="false" />
     <var name="key-id" value-type="long" key-member="id" />
