@@ -52,15 +52,13 @@ public interface ConsoleConfig extends CoreConfig {
 
 	String getConsoleDomain();
 
-	Map<String, String> getConsoleCnameToDc();
-
 	QuorumConfig  getDefaultSentinelQuorumConfig();
 
 	String getReplDisklessMinRedisVersion();
 
 	String getXRedisMinimumRequestVersion();
 
-	String getXpipeRuntimeEnvironmentEnvironment();
+	String getXpipeRuntimeEnvironment();
 
 	String getDBAEmails();
 
@@ -97,4 +95,10 @@ public interface ConsoleConfig extends CoreConfig {
 	String getDatabaseDomainName();
 
 	Map<String, String> getDatabaseIpAddresses();
+
+	int getProxyInfoCollectInterval();
+
+	int getOutterClientCheckInterval();
+
+	Map<String, String> getConsoleDomains();
 }

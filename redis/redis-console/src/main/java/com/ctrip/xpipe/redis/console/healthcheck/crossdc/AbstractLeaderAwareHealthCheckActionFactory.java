@@ -24,7 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * <p>
  * Oct 07, 2018
  */
-public abstract class AbstractCDLAHealthCheckActionFactory implements CrossDcLeaderAwareHealthCheckActionFactory {
+public abstract class AbstractLeaderAwareHealthCheckActionFactory implements SiteLeaderAwareHealthCheckActionFactory {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -54,7 +54,7 @@ public abstract class AbstractCDLAHealthCheckActionFactory implements CrossDcLea
     }
 
     @Override
-    public void destroy(CrossDcLeaderAwareHealthCheckAction action) {
+    public void destroy(SiteLeaderAwareHealthCheckAction action) {
         try {
             LifecycleHelper.stopIfPossible(action);
             action.getActionInstance().unregister(action);
@@ -66,17 +66,19 @@ public abstract class AbstractCDLAHealthCheckActionFactory implements CrossDcLea
     protected abstract List<ALERT_TYPE> alertTypes();
 
     @Override
-    public void isCrossDcLeader() {
+    public void isleader() {
         new SafeLoop<RedisHealthCheckInstance>(executors, healthCheckInstanceManager.getAllRedisInstance()) {
             @Override
             public void doRun0(RedisHealthCheckInstance instance) {
-                registerTo(instance);
+                if (!instance.getRedisInstanceInfo().isCrossRegion()) {
+                    registerTo(instance);
+                }
             }
         }.run();
     }
 
     @Override
-    public void notCrossDcLeader() {
+    public void notLeader() {
         new SafeLoop<RedisHealthCheckInstance>(executors, healthCheckInstanceManager.getAllRedisInstance()) {
             @Override
             public void doRun0(RedisHealthCheckInstance instance) {
@@ -86,7 +88,7 @@ public abstract class AbstractCDLAHealthCheckActionFactory implements CrossDcLea
     }
 
     private void registerTo(RedisHealthCheckInstance instance) {
-        CrossDcLeaderAwareHealthCheckAction action = create(instance);
+        SiteLeaderAwareHealthCheckAction action = create(instance);
         instance.register(action);
         try {
             LifecycleHelper.initializeIfPossible(action);
@@ -107,7 +109,7 @@ public abstract class AbstractCDLAHealthCheckActionFactory implements CrossDcLea
         }
         if(target != null) {
             instance.unregister(target);
-            destroy((CrossDcLeaderAwareHealthCheckAction) target);
+            destroy((SiteLeaderAwareHealthCheckAction) target);
         }
     }
 }

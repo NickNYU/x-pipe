@@ -37,7 +37,6 @@ public class DefaultConsoleConfig extends AbstractCoreConfig implements ConsoleC
     public static final String KEY_ALL_CONSOLES = "console.all.addresses";
     public static final String KEY_QUORUM = "console.quorum";
     public static final String KEY_DOMAIN = "console.domain";
-    public static final String KEY_CNAME_TODC = "console.cname.todc";
 
     public static final String KEY_SENTINEL_QUORUM = "console.sentinel.quorum";
 
@@ -83,6 +82,12 @@ public class DefaultConsoleConfig extends AbstractCoreConfig implements ConsoleC
 
     private static final String KEY_DATABASE_IP_ADDRESSES = "console.database.ip.address";
 
+    private static final String KEY_PROXY_INFO_CHECK_INTERVAL = "console.proxy.info.collector.check.interval";
+
+    private static final String KEY_OUTTER_CLIENT_CHECK_INTERVAL = "console.outter.client.check.interval";
+
+    private static final String KEY_CONSOLE_DOMAINS = "console.domains";
+
     private Map<String, List<ConsoleConfigListener>> listeners = Maps.newConcurrentMap();
 
     @Override
@@ -106,7 +111,7 @@ public class DefaultConsoleConfig extends AbstractCoreConfig implements ConsoleC
     }
 
     @Override
-    public String getXpipeRuntimeEnvironmentEnvironment() {
+    public String getXpipeRuntimeEnvironment() {
         return getProperty(KEY_XPIPE_RUNTIME_ENVIRONMENT, "");
     }
 
@@ -237,13 +242,6 @@ public class DefaultConsoleConfig extends AbstractCoreConfig implements ConsoleC
     }
 
     @Override
-    public Map<String, String> getConsoleCnameToDc() {
-
-        String property = getProperty(KEY_CNAME_TODC, "{}");
-        return JsonCodec.INSTANCE.decode(property, Map.class);
-    }
-
-    @Override
     public QuorumConfig getDefaultSentinelQuorumConfig() {
 
         String config = getProperty(KEY_SENTINEL_QUORUM, "{}");
@@ -337,6 +335,22 @@ public class DefaultConsoleConfig extends AbstractCoreConfig implements ConsoleC
     @Override
     public String getDatabaseDomainName() {
         return getProperty(KEY_DATABASE_DOMAIN_NAME, "localhost");
+    }
+
+    @Override
+    public int getProxyInfoCollectInterval() {
+        return getIntProperty(KEY_PROXY_INFO_CHECK_INTERVAL, 10 * 1000);
+    }
+
+    @Override
+    public int getOutterClientCheckInterval() {
+        return getIntProperty(KEY_OUTTER_CLIENT_CHECK_INTERVAL, 120 * 1000);
+    }
+
+    @Override
+    public Map<String, String> getConsoleDomains() {
+        String property = getProperty(KEY_CONSOLE_DOMAINS, "{}");
+        return JsonCodec.INSTANCE.decode(property, Map.class);
     }
 
     @Override
