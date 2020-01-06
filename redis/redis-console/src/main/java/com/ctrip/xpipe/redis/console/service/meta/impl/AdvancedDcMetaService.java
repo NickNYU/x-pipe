@@ -55,7 +55,7 @@ public class AdvancedDcMetaService implements DcMetaService {
     private SentinelService sentinelService;
 
     @Autowired
-    private KeepercontainerService keepercontainerService;
+    private KeeperContainerService keeperContainerService;
 
     @Autowired
     private SentinelMetaService sentinelMetaService;
@@ -89,8 +89,8 @@ public class AdvancedDcMetaService implements DcMetaService {
     public void initService() {
         int corePoolSize = Math.min(Integer.parseInt(System.getProperty("maximum.pool.size", "20")), OsUtils.getCpuCount() * 5);
         executors = DefaultExecutorFactory.createAllowCoreTimeout("AdvancedDcMetaService", corePoolSize).createExecutorService();
-        int retryTimes = 3, retryDelayMilli = 5;
-        factory = new DefaultRetryCommandFactory(retryTimes, new RetryDelay(retryDelayMilli), scheduled);
+        int retryTimeoutMilli = 3000, retryDelayMilli = 5;
+        factory = new DefaultRetryCommandFactory(retryTimeoutMilli, new RetryDelay(retryDelayMilli), scheduled);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class AdvancedDcMetaService implements DcMetaService {
         @Override
         protected void doExecute() throws Exception {
             try {
-                List<KeepercontainerTbl> keepercontainers = keepercontainerService.findAllByDcName(dcMeta.getId());
+                List<KeepercontainerTbl> keepercontainers = keeperContainerService.findAllByDcName(dcMeta.getId());
                 keepercontainers.forEach(keeperContainer -> dcMeta.addKeeperContainer(
                         keepercontainerMetaService.encodeKeepercontainerMeta(keeperContainer, dcMeta)));
                 future().setSuccess();
@@ -224,7 +224,7 @@ public class AdvancedDcMetaService implements DcMetaService {
         Map<Long, ProxyTbl> proxyTblMap = convertToMap(proxies);
         List<RouteMeta> result = Lists.newArrayListWithCapacity(routes.size());
         for(RouteTbl route : routes) {
-            if(!getDcName(route.getSrcDcId(), dcTbls).equals(dcMeta.getId())) {
+            if(!dcMeta.getId().equals(getDcName(route.getSrcDcId(), dcTbls))) {
                 continue;
             }
             RouteMeta routeMeta = new RouteMeta();
@@ -271,7 +271,7 @@ public class AdvancedDcMetaService implements DcMetaService {
                 sb.append(proxy.getUri()).append(",");
             }
         }
-        if(sb.charAt(sb.length()-1) == ',') {
+        if(sb.length() > 0 && sb.charAt(sb.length()-1) == ',') {
             sb.deleteCharAt(sb.length() - 1);
             sb.append(" ");
         }

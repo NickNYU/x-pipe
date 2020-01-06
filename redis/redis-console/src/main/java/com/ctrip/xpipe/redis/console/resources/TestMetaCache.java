@@ -43,7 +43,7 @@ public class TestMetaCache implements MetaCache {
     }
 
     @Override
-    public Set<HostPort> allKeepers() {
+    public Set<HostPort> getAllKeepers() {
         return null;
     }
 
@@ -97,6 +97,11 @@ public class TestMetaCache implements MetaCache {
     @Override
     public String getActiveDc(HostPort hostPort) {
         return null;
+    }
+
+    @Override
+    public long getLastUpdateTime() {
+        return 0;
     }
 
 }

@@ -3,8 +3,9 @@ package com.ctrip.xpipe.redis.console.healthcheck.actions.sentinel;
 import com.ctrip.xpipe.redis.console.alert.ALERT_TYPE;
 import com.ctrip.xpipe.redis.console.config.ConsoleDbConfig;
 import com.ctrip.xpipe.redis.console.healthcheck.RedisHealthCheckInstance;
-import com.ctrip.xpipe.redis.console.healthcheck.crossdc.AbstractLeaderAwareHealthCheckActionFactory;
-import com.ctrip.xpipe.redis.console.healthcheck.crossdc.SiteLeaderAwareHealthCheckAction;
+import com.ctrip.xpipe.redis.console.healthcheck.leader.AbstractLeaderAwareHealthCheckActionFactory;
+import com.ctrip.xpipe.redis.console.healthcheck.leader.SiteLeaderAwareHealthCheckAction;
+import com.ctrip.xpipe.redis.console.service.ClusterService;
 import com.ctrip.xpipe.utils.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,13 @@ public class SentinelHelloCheckActionFactory extends AbstractLeaderAwareHealthCh
     @Autowired
     private ConsoleDbConfig consoleDbConfig;
 
+    @Autowired
+    private ClusterService clusterService;
+
     @Override
     public SiteLeaderAwareHealthCheckAction create(RedisHealthCheckInstance instance) {
-        SentinelHelloCheckAction action = new SentinelHelloCheckAction(scheduled, instance, executors, consoleDbConfig);
+        SentinelHelloCheckAction action = new SentinelHelloCheckAction(scheduled, instance, executors, consoleDbConfig,
+                clusterService);
         for(SentinelHelloCollector collector : collectors) {
             action.addListener(collector);
         }

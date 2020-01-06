@@ -4,14 +4,17 @@ import com.ctrip.xpipe.endpoint.HostPort;
 import com.ctrip.xpipe.redis.console.AbstractConsoleTest;
 import com.ctrip.xpipe.redis.console.config.ConsoleDbConfig;
 import com.ctrip.xpipe.redis.console.healthcheck.HealthCheckAction;
-import com.ctrip.xpipe.redis.console.healthcheck.HealthCheckActionListener;
 import com.ctrip.xpipe.redis.console.healthcheck.RedisHealthCheckInstance;
 import com.ctrip.xpipe.redis.console.healthcheck.RedisInstanceInfo;
 import com.ctrip.xpipe.redis.console.healthcheck.session.RedisSession;
+import com.ctrip.xpipe.redis.console.migration.status.ClusterStatus;
+import com.ctrip.xpipe.redis.console.model.ClusterTbl;
 import com.ctrip.xpipe.redis.console.resources.MetaCache;
+import com.ctrip.xpipe.redis.console.service.ClusterService;
 import com.ctrip.xpipe.simpleserver.Server;
 import org.junit.*;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Callable;
@@ -48,11 +51,16 @@ public class SentinelHelloCheckActionTest extends AbstractConsoleTest {
     @Mock
     private ConsoleDbConfig config;
 
+    @Mock
+    private ClusterService clusterService;
+
     private RedisHealthCheckInstance instance;
 
     private Server server;
 
     private Supplier<String> result;
+
+    private ClusterTbl clusterTbl = new ClusterTbl().setStatus(ClusterStatus.Normal.toString());
 
     @SuppressWarnings("unchecked")
     @Before
@@ -70,7 +78,10 @@ public class SentinelHelloCheckActionTest extends AbstractConsoleTest {
         });
         instance = newRandomRedisHealthCheckInstance("dc2", server.getPort());
         when(config.isSentinelAutoProcess()).thenReturn(true);
-        action = new SentinelHelloCheckAction(scheduled, instance, executors, config);
+
+        when(clusterService.find(anyString())).thenReturn(clusterTbl);
+        action = new SentinelHelloCheckAction(scheduled, instance, executors, config, clusterService);
+
     }
 
     @After
@@ -84,6 +95,15 @@ public class SentinelHelloCheckActionTest extends AbstractConsoleTest {
     public void testDoScheduledTaskWithProcessOff() {
         action = spy(action);
         when(config.isSentinelAutoProcess()).thenReturn(false);
+        action.doTask();
+        verify(action, never()).processSentinelHellos();
+    }
+
+    @Test
+    public void testDoScheduledTaskWithInSentinelCheckWhitelist() {
+        action = spy(action);
+        when(config.isSentinelAutoProcess()).thenReturn(true);
+        when(config.shouldSentinelCheck(Mockito.anyString(), Mockito.anyBoolean())).thenReturn(false);
         action.doTask();
         verify(action, never()).processSentinelHellos();
     }
@@ -122,7 +142,7 @@ public class SentinelHelloCheckActionTest extends AbstractConsoleTest {
             }
         };
         AtomicInteger counter = new AtomicInteger(0);
-        SentinelHelloCheckAction.SENTINEL_COLLECT_INFO_INTERVAL = 50;
+        SentinelHelloCheckAction.SENTINEL_COLLECT_INFO_INTERVAL = 100;
         action.addListener(new SentinelHelloCollector() {
 
             @Override
@@ -139,7 +159,7 @@ public class SentinelHelloCheckActionTest extends AbstractConsoleTest {
         Assert.assertEquals(1, action.getListeners().size());
         action.doTask();
         waitConditionUntilTimeOut(()->server.getConnected() > 0, 500);
-        sleep(100);
+        sleep(SentinelHelloCheckAction.SENTINEL_COLLECT_INFO_INTERVAL + 100);
         Assert.assertEquals(1, counter.get());
     }
 

@@ -21,7 +21,7 @@ public interface MetaCache {
 
     HostPort findMasterInSameShard(HostPort hostPort);
 
-    Set<HostPort> allKeepers();
+    Set<HostPort> getAllKeepers();
 
     Pair<String, String> findClusterShard(HostPort hostPort);
 
@@ -44,4 +44,6 @@ public interface MetaCache {
     String getActiveDc(String clusterId, String shardId);
 
     String getActiveDc(HostPort hostPort);
+
+    long getLastUpdateTime();
 }

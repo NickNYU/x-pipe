@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -138,14 +139,14 @@ public class ClusterServiceImplTest extends AbstractServiceImplTest{
 
     @Test
     public void testReBalanceSentinels() {
-        List<String> clusters = clusterService.reBalanceSentinels("jq",1);
+        List<String> clusters = clusterService.reBalanceSentinels("jq",1, true);
         Assert.assertEquals(1, clusters.size());
         logger.info("Changed clusters: {}", clusters);
     }
 
     @Test
     public void testReBalanceSentinels2() {
-        List<String> clusters = clusterService.reBalanceSentinels("jq", 10);
+        List<String> clusters = clusterService.reBalanceSentinels("jq", 10, true);
         Assert.assertEquals(clusterService.findAllClusterNames().size(), clusters.size());
         logger.info("Changed clusters: {}", clusters);
     }
@@ -188,7 +189,7 @@ public class ClusterServiceImplTest extends AbstractServiceImplTest{
 
         int checkTimes = 10;
         while(checkTimes -- > 0) {
-            clusterService.reBalanceSentinels("jq", 10);
+            clusterService.reBalanceSentinels("jq", 10, true);
             DcClusterShardTbl dcClusterShardTbl1 = dcClusterShardService.find(dcNames[0], clusterName, shard1.getShardName());
             DcClusterShardTbl dcClusterShardTbl2 = dcClusterShardService.find(dcNames[0], clusterName, shard2.getShardName());
             Assert.assertEquals(dcClusterShardTbl1.getSetinelId(), dcClusterShardTbl2.getSetinelId());
@@ -214,6 +215,18 @@ public class ClusterServiceImplTest extends AbstractServiceImplTest{
         Assert.assertEquals(10, iCounter);
         Assert.assertEquals(10, jCounter);
         Assert.assertEquals(20, kCounter);
+    }
+
+    @Test
+    public void testFindAllClusterByKeeperContainer() {
+        List<ClusterTbl> clusterTbls = clusterService.findAllClusterByKeeperContainer(4);
+        Assert.assertTrue(clusterTbls.size() > 0);
+        Assert.assertNotNull(clusterTbls.get(0).getOrganizationInfo());
+    }
+
+    @Override
+    protected String prepareDatas() throws IOException {
+        return prepareDatasFromFile("src/test/resources/cluster-service-impl-test2.sql");
     }
 
 }
